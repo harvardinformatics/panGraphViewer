@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 import environ
+import django.core.management.utils
+import urllib.parse
 
 env = environ.Env()
 environ.Env.read_env()
@@ -23,14 +25,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'bvclmfhj=(5$)3j(ni-x7_=y8@urm87j@xo6(l&r^farqmxww8'
+# https://stackoverflow.com/a/57678930
+SECRET_KEY = django.core.management.utils.get_random_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = True
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [host for host in os.environ.get("ALLOWED_HOSTS", "*").split(",")]
 
 
 # Application definition
@@ -86,7 +87,7 @@ WSGI_APPLICATION = 'pangraph.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR + '/db.sqlite3',
+        'NAME': BASE_DIR + '/data/db.sqlite3',
     },
 }
 
@@ -131,7 +132,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
-STATIC_URL = '/static/'
+STATIC_URL = urllib.parse.urljoin(os.environ.get("URL_PREFIX", "/"), "static/")
 
 DJANGO_BOOTSTRAP_UI_THEME = 'bootswatch-paper'
 

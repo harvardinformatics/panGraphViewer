@@ -17,7 +17,6 @@ from pangraphviewer.gfa2rGFA import *
 
 from .models import *
 
-from django.contrib.auth.decorators import login_required
 import datetime
 
 
@@ -32,22 +31,17 @@ upload_file_ext = {'gfa':['.gfa','.rgfa'],
                    'fasta':['.fa','.fasta','.fna'],
                    'bed':['.bed','.gtf','.gff','.gff3']}
 
-@login_required
 def get_work_dir(request, folder_list=[], file_name=''):
     global work_base_dir
 
     if not work_base_dir:
-        profile = Profile.objects.get_or_create(username=request.user.username)
-        work_base_dir = profile[0].work_base_dir if profile[0].work_base_dir else getVar(copied, 'web', 'work_dir', mustHave=True)
+        work_base_dir = getVar(copied, 'web', 'work_dir', mustHave=True)
 
     if sys.platform == 'win32' and work_base_dir[0] == '/':
         drive = os.path.dirname(os.path.realpath(__file__)).split(':')[0]
         work_base_dir = f'{drive}:{work_base_dir}'.replace('/','\\')
-        profile = Profile.objects.get_or_create(username=request.user.username)
-        profile[0].work_base_dir = work_base_dir
-        profile[0].save()
 
-    work_dir = os.path.join(work_base_dir, request.user.username, *folder_list)
+    work_dir = work_base_dir
     if os.path.isdir(work_dir):
         if not os.access(work_dir, os.W_OK):
             raise Exception(f'Working directory {work_dir} exists but is inaccessible')
@@ -56,7 +50,6 @@ def get_work_dir(request, folder_list=[], file_name=''):
 
     return os.path.join(work_dir, file_name)
 
-@login_required
 def get_uploaded_list(request):
     file_type = request.POST.get('file_type','')
 
@@ -66,7 +59,6 @@ def get_uploaded_list(request):
 
     return JsonResponse({'files':files,'work_dir':work_dir}, safe=False, status=status)
 
-@login_required
 def getdata(request):
     input_type = request.POST.get('input_type','')
     gfa = request.POST.get('gfa','')
@@ -128,7 +120,6 @@ def getdata(request):
 
     return JsonResponse({'error':error,'warning':warning,'cyData':cyData,'gfa':os.path.basename(gfa),'legend':legend}, safe=False, status=status)
 
-@login_required
 def parse_gfa(request):
     start_time = time.time()
 
@@ -155,7 +146,6 @@ def parse_gfa(request):
 
     return JsonResponse(results, status=200)
 
-@login_required
 def parse_vcf(request):
     start_time = time.time()
     vcf = request.POST.get('vcf','')
@@ -179,7 +169,6 @@ def parse_vcf(request):
 
     return JsonResponse(results, status=200)
 
-@login_required
 def parse_bed(request):
     start_time = time.time()
     gfa = request.POST.get('gfa','')
@@ -239,7 +228,6 @@ def parse_bed(request):
 
     return JsonResponse(results, status=200)
 
-@login_required
 def graph(request):
     template_name = 'pangraphviewer/graph.html'
 
@@ -264,7 +252,6 @@ def graph(request):
     return render(request, template_name, context=context)
 
 @transaction.atomic
-@login_required
 def config(request):
     global work_base_dir
 
@@ -274,9 +261,6 @@ def config(request):
         try:
             with transaction.atomic():
                 work_base_dir = request.POST.get('work_base_dir','')
-                profile = Profile.objects.get_or_create(username=request.user)
-                profile[0].work_base_dir = work_base_dir
-                profile[0].save()
 
                 work_base_dir = None
                 get_work_dir(request)
@@ -288,16 +272,8 @@ def config(request):
         return JsonResponse(None, safe=False, status=status)
     else:
         try:
-            profile = Profile.objects.get_or_create(username=request.user)
-            if not profile[0].work_base_dir:
-                profile[0].work_base_dir = getVar(copied, 'web', 'work_dir', mustHave=True)
-                profile[0].save()
-
             get_work_dir(request)
         except:
-            profile[0].work_base_dir = getVar(copied, 'web', 'work_dir', mustHave=True)
-            profile[0].save()
-
             work_base_dir = None
             get_work_dir(request)
 
@@ -327,7 +303,6 @@ def getnodes(request):
 
     return results
 
-@login_required
 def viewseq(request):
     nodes = getnodes(request)
     text = '\n'.join([f">{node['seqname']}\t{node['title']}\n{node['seq']}" for node in nodes])
@@ -337,7 +312,6 @@ def viewseq(request):
 
     return response
 
-@login_required
 def downloadseq(request):
     nodes = getnodes(request)
     text = '\n'.join([f">{node['seqname']}\t{node['title']}\n{node['seq']}" for node in nodes])
@@ -350,7 +324,6 @@ def downloadseq(request):
 
     return response
 
-@login_required
 def download_rgfa(request):
     rgfa = request.GET.get('rgfa','')
     rgfa = get_work_dir(request, ['gfa'], rgfa)
@@ -369,7 +342,6 @@ def download_rgfa(request):
     else:
         return JsonResponse('', safe=False, status=400)
 
-@login_required
 def convert_vcf(request):
     output = None
 
@@ -403,7 +375,6 @@ def convert_vcf(request):
 
     return JsonResponse(output, safe=False, status=200)
 
-@login_required
 def vcf_to_gfa(request):
     template_name = 'pangraphviewer/vcf_to_gfa.html'
     context = {
@@ -413,7 +384,6 @@ def vcf_to_gfa(request):
 
     return render(request, template_name, context=context)
 
-@login_required
 def upload_file(request):
     if request.is_ajax():
         error, warning = '', ''

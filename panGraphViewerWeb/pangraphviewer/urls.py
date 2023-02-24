@@ -3,7 +3,7 @@ from django.urls import path, re_path
 from . import views
 
 urlpatterns = [
-    re_path(r'^$', views.graph, name='default'),
+    path('', views.graph, name='default'),
 
     # main pages
     path('graph', views.graph, name='graph'),
