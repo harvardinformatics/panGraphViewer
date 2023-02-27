@@ -44,9 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pangraphviewer.apps.pangraphviewerConfig',
-
     'bootstrap4',
-    'fontawesome-free'
+    'fontawesomefree'
 ]
 
 MIDDLEWARE = [

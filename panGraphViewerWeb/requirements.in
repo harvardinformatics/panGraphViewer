@@ -1,0 +1,11 @@
+Django==3.*
+django-bootstrap4
+django-environ
+djangorestframework
+natsort
+networkx
+fontawesomefree==5.15.4
+bokeh
+dna_features_viewer
+pysam
+whitenoise
