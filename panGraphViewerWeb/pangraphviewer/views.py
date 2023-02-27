@@ -251,39 +251,6 @@ def graph(request):
 
     return render(request, template_name, context=context)
 
-@transaction.atomic
-def config(request):
-    global work_base_dir
-
-    template_name = 'pangraphviewer/config.html'
-
-    if request.is_ajax():
-        try:
-            with transaction.atomic():
-                work_base_dir = request.POST.get('work_base_dir','')
-
-                work_base_dir = None
-                get_work_dir(request)
-
-                status = 200
-        except:
-            status = 400
-
-        return JsonResponse(None, safe=False, status=status)
-    else:
-        try:
-            get_work_dir(request)
-        except:
-            work_base_dir = None
-            get_work_dir(request)
-
-        context = {
-            'config_page': 'active',
-            'work_base_dir': work_base_dir,
-        }
-
-        return render(request, template_name, context=context)
-
 def getnodes(request):
     results = []
 

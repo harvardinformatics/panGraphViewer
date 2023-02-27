@@ -7,7 +7,6 @@ urlpatterns = [
 
     # main pages
     path('graph', views.graph, name='graph'),
-    path('config', views.config, name='config'),
     path('vcf_to_gfa', views.vcf_to_gfa, name='vcf_to_gfa'),
 
     # supporting pages
